@@ -23,6 +23,10 @@ jobs:
     - name: Install pip dependencies
       run: pip install -r requirements.txt
       
+    # Debug client payload
+    - name: Debug client payload
+      run: echo "${{ toJson(github.event.client_payload) }}"
+
     # Check dataset URL
     - name: Check dataset URL
       run: |
