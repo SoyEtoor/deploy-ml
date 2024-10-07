@@ -13,48 +13,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout code
     - uses: actions/checkout@v3
 
-    # Install Python and dependencies
+    # Pip install
     - name: Check Python version
       run: python --version
 
     - name: Install pip dependencies
       run: pip install -r requirements.txt
-      
-    # Debug client payload
-    - name: Debug client payload
-      run: echo "${{ toJson(github.event.client_payload) }}"
 
-    # Check dataset URL
-    - name: Check dataset URL
-      run: |
-        if [ -z "${{ github.event.client_payload.dataseturl }}" ]; then
-          echo "Error: dataseturl is not set"
-          exit 1
-        fi
-
-    # Download dataset
-    - name: Download dataset
-      run: wget -O data/heart_disease.csv "${{ github.event.client_payload.dataseturl }}"
-    
-    - name: Cat dataset
+    # Download Dataset
+    - name: download dataset
+      run: wget -O data/heart_disease.csv ${{github.event.client_payload.dataseturl}}
+    - name: cat dataset
       run: cat data/heart_disease.csv
+
 
     # Train model
     - name: Train model
       run: python model/train.py
 
-    # Docker build
+    # Docker login, docker build
     - name: Docker build
       run: docker build -t ${{ secrets.DOCKER_USER }}/${{ secrets.MODEL_NAME }}:${{ github.sha }} .
 
-    # Show Docker images
     - name: Show Docker images
       run: docker images
 
-    # Docker login and push
     - name: Docker login
       env:
         DOCKER_USER: ${{ secrets.DOCKER_USER }}
