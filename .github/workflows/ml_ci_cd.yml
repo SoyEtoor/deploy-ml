@@ -23,10 +23,19 @@ jobs:
     - name: Install pip dependencies
       run: pip install -r requirements.txt
       
+    # Check dataset URL
+    - name: Check dataset URL
+      run: |
+        if [ -z "${{ github.event.client_payload.dataseturl }}" ]; then
+          echo "Error: dataseturl is not set"
+          exit 1
+        fi
+
     # Download dataset
-    - name: download dataset
-      run: wget -O data/heart_disease.csv ${{github.event.client_payload.dataseturl}}
-    - name: cat dataset
+    - name: Download dataset
+      run: wget -O data/heart_disease.csv ${{ github.event.client_payload.dataseturl }}
+    
+    - name: Cat dataset
       run: cat data/heart_disease.csv
 
     # Train model
@@ -35,7 +44,7 @@ jobs:
 
     # Docker build
     - name: Docker build
-      run: docker build -t ${{secrets.DOCKER_USER}}/${{secrets.MODEL_NAME}}:${{github.sha}} .
+      run: docker build -t ${{ secrets.DOCKER_USER }}/${{ secrets.MODEL_NAME }}:${{ github.sha }} .
 
     - name: Show Docker images
       run: docker images
@@ -43,10 +52,10 @@ jobs:
     # Docker login and push
     - name: Docker login
       env:
-        DOCKER_USER: ${{secrets.DOCKER_USER}}
-        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+        DOCKER_USER: ${{ secrets.DOCKER_USER }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       run: |
         docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
 
     - name: Docker push
-      run: docker push ${{secrets.DOCKER_USER}}/${{secrets.MODEL_NAME}}:${{github.sha}}
+      run: docker push ${{ secrets.DOCKER_USER }}/${{ secrets.MODEL_NAME }}:${{ github.sha }}
