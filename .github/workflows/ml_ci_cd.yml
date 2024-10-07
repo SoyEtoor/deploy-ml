@@ -28,7 +28,6 @@ jobs:
       run: wget -O data/heart_disease.csv ${{github.event.client_payload.dataseturl}}
     - name: cat dataset
       run: cat data/heart_disease.csv
-    - name: train model
 
     # Train model
     - name: Train model
