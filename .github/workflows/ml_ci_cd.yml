@@ -43,8 +43,9 @@ jobs:
       run: python model/train.py
 
     # Docker build
-    - name: Docker build
-      run: docker build -t ${{ secrets.DOCKER_USER }}/${{ secrets.MODEL_NAME }}:${{ github.sha }} .
+    - name: docker build
+      run: docker build -t ${{secrets.DOCKER_USER}}/${{secrets.MODEL_NAME}}:${{github.event.client_payload.sha}} .
+    - name: docker login
 
     - name: Show Docker images
       run: docker images
@@ -58,4 +59,4 @@ jobs:
         docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
 
     - name: Docker push
-      run: docker push ${{ secrets.DOCKER_USER }}/${{ secrets.MODEL_NAME }}:${{ github.sha }}
+      run: docker push ${{secrets.DOCKER_USER}}/${{secrets.MODEL_NAME}}:${{github.event.client_payload.sha }}
