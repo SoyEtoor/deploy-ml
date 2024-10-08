@@ -1,5 +1,4 @@
 name: Modelops deploy
-
 on:
   push:
     branches: [ master ]
@@ -7,45 +6,30 @@ on:
     branches: [ master ]
   repository_dispatch:
     types: [ml_ci_cd]
-
 jobs:
   ml_ci_cd:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v3
-
-    # Pip install
-    - name: Check Python version
+    - uses: actions/checkout@v2
+    - name: python version
       run: python --version
-
-    - name: Install pip dependencies
+    - name: pip install
       run: pip install -r requirements.txt
-
-    # Download Dataset
     - name: download dataset
       run: wget -O data/heart_disease.csv ${{github.event.client_payload.dataseturl}}
     - name: cat dataset
       run: cat data/heart_disease.csv
-
-
-    # Train model
-    - name: Train model
+    - name: train model
       run: python model/train.py
-
-    # Docker login, docker build
-    - name: Docker build
-      run: docker build -t ${{ secrets.DOCKER_USER }}/${{ secrets.MODEL_NAME }}:${{ github.sha }} .
-
-    - name: Show Docker images
+    - name: docker build
+      run: docker build -t ${{secrets.DOCKER_USER}}/${{secrets.MODEL_NAME}}:${{github.event.client_payload.sha}} .
+    - name: show images
       run: docker images
-
-    - name: Docker login
+    - name: docker login
       env:
-        DOCKER_USER: ${{ secrets.DOCKER_USER }}
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        DOCKER_USER: ${{secrets.DOCKER_USER}}
+        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
       run: |
-        echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "$DOCKER_USER" --password-stdin 
-
-    - name: Docker push
-      run: docker push ${{ secrets.DOCKER_USER }}/${{ secrets.MODEL_NAME }}:${{ github.sha }}
+        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
+    - name: docker Push
+      run: docker push ${{secrets.DOCKER_USER}}/${{secrets.MODEL_NAME}}:${{github.event.client_payload.sha}}
